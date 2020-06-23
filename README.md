@@ -5,7 +5,7 @@ Original idea: [signidice](https://github.com/gluk256/misc/blob/master/rng4ether
 ## Repo structure
 
 Main components:
-- Contract SDK ([link](./3rdparty/sdk)) - SDK for writing, building and testing game contracts.
+- Contract SDK ([link](https://github.com/DaoCasino/game-contract-sdk/tree/491a2e552842687cfda2fa963390b4f5f361c2a0)) - SDK for writing, building and testing game contracts.
 - RNG contract ([link](./contracts)) - stub game contract to test RNG generator.
 - RNG test ([link](./test)) - RNG test runner.
 
@@ -59,7 +59,7 @@ Main components:
 
 ### Details of all RNG / game implementation, including methods of scaling and mapping from raw RNG output to a game outcome.
 
- - RNG related code(more details: [link](./3rdparty/sdk/sdk/include/game-contract-sdk/service.hpp)):
+ - RNG related code(more details: [link](https://github.com/DaoCasino/game-contract-sdk/tree/491a2e552842687cfda2fa963390b4f5f361c2a0/sdk/include/game-contract-sdk/service.hpp)):
 
 ```c++
 // ===================================================================
