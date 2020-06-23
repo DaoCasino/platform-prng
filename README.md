@@ -20,16 +20,16 @@ Main components:
 
 ### What operating system does it run on?
 
- - That example by default run in docker, so that can be runned on any docker support OS 
+ - That example by default run in docker, so that can be run on any docker support OS 
 
 ### What is the programming language (Java, C++, C# etc...)?
 
  - We use C++ either for Smart Contracts and Test runner
- - And a litle bit bash only for running scripts
+ - And a little bit bash only for running scripts
 
-### Is it a hardware or software based RNG or a combination of both? Please provide any relevant details
+### Is it a hardware or software-based RNG or a combination of both? Please provide any relevant details
 
- - software based
+ - software-based
 
 ### Type of mathematical algorithm used;
 
@@ -37,14 +37,14 @@ Main components:
 
 ### Mathematical details of the RNG’s period;
 
- - Our solution haven't RNG period, as there is a new unique seed used each time a random number is generated. This seed is obtained through combining the user's the game data (such as session number, game ID, etc.).
+ - Our solution has no RNG period, as there is a new unique seed used each time a random number is generated. This seed is obtained by combining the user's game data (such as session number, game ID, etc.).
 
 ### Mathematical details of the RNG’s range (e.g., minimum value, maximum value);
 
  - original signidice range - ```[0, 2^256 - 1] (hash size)```
  - Xoshiro RPNG range - ```[0, 2^64 - 1] (uint64_t size)```
 
-### Mathematical details of the methods for seeding and reseeding (e.g., seed entropy source, frequency of reseeding, size of seed, etc.);
+### Mathematical details of the methods for seeding and reseeding (e.g., seed entropy source, frequency of reseeding, size of a seed, etc.);
 
  - seed type: *uint64_t*
  - default test seeding approach: 
@@ -54,7 +54,7 @@ Main components:
 
     // our code uses c++ std::rand() function for all further random generation
  ```
- - also you can provide custom `uint64_t` seed to test (see running examples below)
+ - you can provide a custom `uint64_t` seed to test (see running examples below)
 
 
 ### Details of all RNG / game implementation, including methods of scaling and mapping from raw RNG output to game outcome.
@@ -161,7 +161,7 @@ void shuffle(RandomIt first, RandomIt last, PRNG::Ptr& prng) {
 // ===================================================================
 
 /**
-   Signidice sign check and calculate new 256-bit digest.
+   Signidice sign check and calculation of a new 256-bit digest.
    Params:
     - prev_digest - signing digest
     - sign - rsa sign
@@ -197,7 +197,7 @@ auto new_random = get_prng(std::move(rand_seed))->next();
 
 ### description
 
-You can launch our tests for understanding processes generating a random number between clients with singature erification and generation in smart-contract.
+You can launch our tests for understanding processes generating a random number between clients with signature verification and generation in smart-contract.
 
 ### dependencies
 
@@ -258,6 +258,7 @@ Some examples:
 
 - You can also combine all arguments to get more preferable setup:
   ```bash
-  # will generate 1000 numbers with seed 42 in range [0,1000) and write results to `results.txt` file
+  # will generate 1000 numbers with seed 42 in the range [0,1000) and write results to `results.txt` file
   ./cicd/run test --count 1000 --seed 42 --range 100 --out result.txt
   ```
+  
