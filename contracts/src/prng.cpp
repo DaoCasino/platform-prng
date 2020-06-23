@@ -8,7 +8,10 @@ void prng::on_new_game(uint64_t ses_id) {
 }
 
 void prng::on_action(uint64_t ses_id, uint16_t type, std::vector<game_sdk::param_t> params) {
+    // params[0] is random range limit
     eosio::check(params.size() == 1, "invalid params count");
+
+    // save limit to storage
     state.rnd_range = params[0];
 
     // always require random
@@ -16,8 +19,10 @@ void prng::on_action(uint64_t ses_id, uint16_t type, std::vector<game_sdk::param
 }
 
 void prng::on_random(uint64_t ses_id, checksum256 rand_seed) {
-    // player always return deposit
+    // get new random from generator
     auto new_random = get_prng(std::move(rand_seed))->next() % state.rnd_range;
+
+    // return deposit and return random number
     finish_game(get_session(ses_id).deposit, {{ new_random }});
 }
 
@@ -28,3 +33,4 @@ void prng::on_finish(uint64_t ses_id) {
 } // namespace prng
 
 GAME_CONTRACT(prng::prng)
+

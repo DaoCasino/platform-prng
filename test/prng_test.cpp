@@ -9,10 +9,10 @@
 
 #include "contracts.hpp"
 
+
 using namespace testing;
 using namespace boost::unit_test;
 namespace po = boost::program_options;
-
 
 struct colors {
     inline static const std::string red   = "\033[1;31m";
@@ -20,6 +20,8 @@ struct colors {
     inline static const std::string reset = "\033[0m";
 };
 
+
+// tester class
 class prng_tester : public game_tester {
   public:
     static const name contract_name;
@@ -31,26 +33,35 @@ class prng_tester : public game_tester {
     prng_tester() {
         create_account(contract_name);
 
+        // deploy PRNG contract
         deploy_game<prng_stub>(contract_name, {});
 
+        // create tester account
         create_player(player_name);
 
+        // transfer initial funds
         transfer(N(eosio), player_name, STRSYM("1000.0000"));
         transfer(N(eosio), casino_name, STRSYM("1000.0000"));
     }
 
+    // generate next random number
     uint64_t next(uint64_t range) {
-        auto player_bet = STRSYM("1.0000");
+        auto player_bet = STRSYM("1.0000"); ///< player's bet amount, that stuff doesn't affect to random result
+
+        // create new game session
         auto ses_id = new_game_session(contract_name, player_name, casino_id, player_bet);
 
+        // request new random
         game_action(contract_name, ses_id, 0, { range });
 
+        // process signidice protocol
         signidice(contract_name, ses_id);
 
+        // obtain return value with generated random
         const auto finish_event = get_events(events_id::game_finished);
-        const auto values = fc::raw::unpack<std::vector<uint64_t>>(finish_event.value()[0]["msg"].as<bytes>());
+        const auto rand = fc::raw::unpack<std::vector<uint64_t>>(finish_event.value()[0]["msg"].as<bytes>())[0];
 
-        return values[0];
+        return rand;
     }
 };
 
@@ -66,8 +77,9 @@ void print_greeting() {
         << colors::reset;
 }
 
+// cli options parser
 po::variables_map parse_cli_args() {
-    po::options_description desc("Test options");
+    po::options_description desc("PRNG tester options");
     desc.add_options()
         ("help,h", "produce help message")
         ("seed,s", po::value<uint64_t>(), "initial seed value")
@@ -89,7 +101,7 @@ po::variables_map parse_cli_args() {
 }
 
 
-
+// main test scenario
 BOOST_AUTO_TEST_CASE(prng_test) {
     print_greeting();
 
@@ -99,12 +111,13 @@ BOOST_AUTO_TEST_CASE(prng_test) {
         auto seed = opts["seed"].as<uint64_t>();
         std::cout << "Random number generator "
             << colors::green << "RESEEDED" << colors::reset << " to "
-            << seed << "\n";
+            << colors::red << seed << colors::reset << "\n\n";
         srand(seed);
     }
 
-    uint32_t iters = 10u;
-    uint64_t range = UINT64_MAX;
+    uint32_t iters = 10u; ///< default iterations amount
+    uint64_t range = UINT64_MAX; ///< default random range
+
     std::ofstream file_out;
 
     if (opts.count("count")) {
@@ -129,9 +142,12 @@ BOOST_AUTO_TEST_CASE(prng_test) {
             std::cout << tester->next(range) << "\n";
         }
 
-        // recreate new tester
+        // recreate new tester to release memory
         if (i % 1000 == 0) {
             tester = std::make_shared<prng_tester>();
         }
     }
+
+    std::cout << colors::green << "\nTest succesfully completed" << colors::reset << "\n";
 }
+
