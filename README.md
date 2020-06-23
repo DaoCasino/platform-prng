@@ -20,12 +20,12 @@ Main components:
 
 ### What operating system does it run on?
 
- - That example by default run in docker, so that can be run on any docker support OS 
+ - That example by default run in docker, so that can be run on any docker supported OS 
 
-### What is the programming language (Java, C++, C# etc...)?
+### Programming languages used (Java, C++, C# etc...)?
 
- - We use C++ either for Smart Contracts and Test runner
- - And a little bit bash only for running scripts
+ - We use C++ for Smart Contracts and Test runner
+ - And a little bit of bash only for running the scripts
 
 ### Is it a hardware or software-based RNG or a combination of both? Please provide any relevant details
 
@@ -37,7 +37,7 @@ Main components:
 
 ### Mathematical details of the RNG’s period;
 
- - Our solution has no RNG period, as there is a new unique seed used each time a random number is generated. This seed is obtained by combining the user's game data (such as session number, game ID, etc.).
+ - Our solution has no RNG period, as we use a new unique seed each time a random number is generated. This seed is obtained by combining the user's game data (such as session number, game ID, etc.).
 
 ### Mathematical details of the RNG’s range (e.g., minimum value, maximum value);
 
@@ -57,7 +57,7 @@ Main components:
  - you can provide a custom `uint64_t` seed to test (see running examples below)
 
 
-### Details of all RNG / game implementation, including methods of scaling and mapping from raw RNG output to game outcome.
+### Details of all RNG / game implementation, including methods of scaling and mapping from raw RNG output to a game outcome.
 
  - RNG related code(more details: [link](./3rdparty/sdk/sdk/include/game-contract-sdk/service.hpp)):
 
@@ -157,7 +157,7 @@ void shuffle(RandomIt first, RandomIt last, PRNG::Ptr& prng) {
 }
 
 // ===================================================================
-// SIGNICIDE functions
+// SIGNIDICE functions
 // ===================================================================
 
 /**
@@ -185,7 +185,7 @@ auto new_random = get_prng(std::move(rand_seed))->next();
 
 ### Does the RNG process make use of a database? If so, please provide details.
 
- - RNG process doesn’t use any database. But game-protocols use [DAOBet](https://github.com/DaoCasino/DAOBet).
+ - RNG process doesn’t use any database. But game-protocols do. [DAOBet](https://github.com/DaoCasino/DAOBet).
 
 ### (Optional) If there is any additional documentation on your RNG available that would aid us in understanding its implementation to the game etc., it would be helpful.
 
@@ -197,7 +197,7 @@ auto new_random = get_prng(std::move(rand_seed))->next();
 
 ### description
 
-You can launch our tests for understanding processes generating a random number between clients with signature verification and generation in smart-contract.
+You can launch our tests to understand the processes generating a random number between the clients with signature verification and generation in a smart-contract.
 
 ### dependencies
 
@@ -223,26 +223,26 @@ git submodule update --init --recursive
 
 #### test setup&run
 
-You can found available test parameters by calling:
+You can find available test parameters by calling:
 ```bash
 ./cicd/run test --help
 ```
 
 Some examples:
-- pass particular initial seed:
+- pass a particular initial seed:
 
   ```bash
   ./cicd/run test --seed 42
   ```
 
-- set generation upper bound:
+- set an upper bound of the generation range:
 
   ```bash
   # will generate numbers in range [0,1000)
   ./cicd/run test --range 1000
   ```
 
-- define iterations amount:
+- define a number of iterations:
 
   ```bash
   # will generate 100 random numbers
@@ -256,9 +256,12 @@ Some examples:
   ./cicd/run test --out result.txt
   ```
 
-- You can also combine all arguments to get more preferable setup:
+- You can also combine all arguments to get a more preferable setup:
   ```bash
   # will generate 1000 numbers with seed 42 in the range [0,1000) and write results to `results.txt` file
   ./cicd/run test --count 1000 --seed 42 --range 100 --out result.txt
   ```
   
+
+
+
