@@ -85,6 +85,7 @@ po::variables_map parse_cli_args() {
         ("seed,s", po::value<uint64_t>(), "initial seed value")
         ("count,c", po::value<uint32_t>(), "iterations amount")
         ("range,r", po::value<uint64_t>(), "random range")
+        ("columns,r", po::value<uint64_t>(), "columns count")
         ("out,o", po::value<std::string>(), "output file")
     ;
 
@@ -117,7 +118,9 @@ BOOST_AUTO_TEST_CASE(prng_test) {
 
     uint32_t iters = 10u; ///< default iterations amount
     uint64_t range = UINT64_MAX; ///< default random range
+    uint64_t columns = 1u; //< default columns count
 
+    std::ostream* output = &std::cout;
     std::ofstream file_out;
 
     if (opts.count("count")) {
@@ -128,18 +131,24 @@ BOOST_AUTO_TEST_CASE(prng_test) {
         range = opts["range"].as<uint64_t>();
     }
 
+    if (opts.count("columns")) {
+        columns = opts["columns"].as<uint64_t>();
+    }
+
     if (opts.count("out")) {
         file_out.open(opts["out"].as<std::string>());
+        output = &file_out;
         std::cout << "Results will be saved to '" << opts["out"].as<std::string>() << "' file\n";
     }
 
     auto tester = std::make_shared<prng_tester>();
 
     for (auto i = 0; i < iters; ++i) {
-        if (file_out.is_open()) {
-            file_out << tester->next(range) << "\n";
+        *output << tester->next(range);
+        if ((i + 1) % columns == 0) {
+            *output << "\n";
         } else {
-            std::cout << tester->next(range) << "\n";
+            *output << "\t";
         }
 
         // recreate new tester to release memory

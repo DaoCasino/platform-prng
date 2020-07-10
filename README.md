@@ -20,7 +20,7 @@ Main components:
 
 ### What operating system does it run on?
 
- - That example by default run in docker, so that can be run on any docker supported OS 
+ - That example by default run in docker, so that can be run on any docker supported OS
 
 ### Programming languages used (Java, C++, C# etc...)?
 
@@ -47,7 +47,7 @@ Main components:
 ### Mathematical details of the methods for seeding and reseeding (e.g., seed entropy source, frequency of reseeding, size of a seed, etc.);
 
  - seed type: *uint64_t*
- - default test seeding approach: 
+ - default test seeding approach:
  ```c++
     const auto seed = time(NULL);
     std::srand(seed);
@@ -249,6 +249,13 @@ Some examples:
   ./cicd/run test --count 100
   ```
 
+- define columns amount:
+
+  ```bash
+  # will generate 3x3 numbers matrix
+  ./cicd/run test --columns 3 --count 9
+  ```
+
 - write result to file:
 
   ```bash
@@ -258,10 +265,10 @@ Some examples:
 
 - You can also combine all arguments to get a more preferable setup:
   ```bash
-  # will generate 1000 numbers with seed 42 in the range [0,1000) and write results to `results.txt` file
-  ./cicd/run test --count 1000 --seed 42 --range 100 --out result.txt
+  # will generate 999 numbers with seed 42 in the range [0,1000) and write results to `results.txt` file
+  ./cicd/run test --count 999 --seed 42 --range 100 --columns 3 --out result.txt
   ```
-  
+
 
 
 
