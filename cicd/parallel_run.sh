@@ -28,8 +28,8 @@ run_num=0
 while IFS= read -r line
 do
     args=($line)
-    positions=${args[0]}
-    range=${args[1]}
+    range=${args[0]}
+    positions=${args[1]}
     iters=${args[2]}
 
     echo "Running #$run_num for $positions positions and $iters iters"
