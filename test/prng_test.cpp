@@ -1,3 +1,4 @@
+#define NON_VALIDATING_TEST
 #include <game_tester/game_tester.hpp>
 
 #include <boost/program_options.hpp>
@@ -6,6 +7,7 @@
 #include <optional>
 #include <string>
 #include <vector>
+#include <chrono>
 
 #include "contracts.hpp"
 
@@ -44,24 +46,24 @@ class prng_tester : public game_tester {
         transfer(N(eosio), casino_name, STRSYM("1000.0000"));
     }
 
-    // generate next random number
-    uint64_t next(uint64_t range) {
+    // generate next random numbers line
+    std::vector<uint64_t> line(uint64_t range, uint64_t positions) {
         auto player_bet = STRSYM("1.0000"); ///< player's bet amount, that stuff doesn't affect to random result
 
         // create new game session
         auto ses_id = new_game_session(contract_name, player_name, casino_id, player_bet);
 
         // request new random
-        game_action(contract_name, ses_id, 0, { range });
+        game_action(contract_name, ses_id, 0, { range, positions });
 
         // process signidice protocol
         signidice(contract_name, ses_id);
 
         // obtain return value with generated random
         const auto finish_event = get_events(events_id::game_finished);
-        const auto rand = fc::raw::unpack<std::vector<uint64_t>>(finish_event.value()[0]["msg"].as<bytes>())[0];
+        const auto numbers = fc::raw::unpack<std::vector<uint64_t>>(finish_event.value()[0]["msg"].as<bytes>());
 
-        return rand;
+        return numbers;
     }
 };
 
@@ -141,22 +143,39 @@ BOOST_AUTO_TEST_CASE(prng_test) {
         std::cout << "Results will be saved to '" << opts["out"].as<std::string>() << "' file\n";
     }
 
+    auto start_time = std::chrono::system_clock::now();
+
     auto tester = std::make_shared<prng_tester>();
 
-    for (auto i = 0; i < iters; ++i) {
-        *output << tester->next(range);
-        if ((i + 1) % columns == 0) {
-            *output << "\n";
-        } else {
-            *output << "\t";
+    for (auto i = 1; i <= iters; ++i) {
+        auto new_line = tester->line(range, columns);
+        for (auto && item: new_line) {
+            *output << item << "\t";
         }
+
+        *output << "\n";
 
         // recreate new tester to release memory
         if (i % 1000 == 0) {
             tester = std::make_shared<prng_tester>();
         }
+
+        // if out to file print status
+        if (opts.count("out") && (i % 100 == 0 || i == iters)) {
+            auto pct = (double)i / iters * 100;
+            std::cout
+                << "Current status: " << i << "/" << iters
+                << ", processed " << std::fixed << std::setprecision(2) << pct << "%"
+                << "\n" << std::flush;
+        }
     }
 
-    std::cout << colors::green << "\nTest succesfully completed" << colors::reset << "\n";
+    auto end_time = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end_time - start_time;
+
+    std::cout << colors::green
+        << "\nTest succesfully completed, "
+        << "elapsed time: " << elapsed_seconds.count() << "s"
+        << colors::reset << "\n";
 }
 

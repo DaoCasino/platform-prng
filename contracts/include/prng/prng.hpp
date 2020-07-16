@@ -14,6 +14,7 @@ class [[eosio::contract]] prng : public game_sdk::game {
 
     struct [[eosio::table("state")]] state_row {
         uint64_t rnd_range;
+        uint64_t positions;
     };
     using state_singleton = eosio::singleton<"state"_n, state_row>;
 
