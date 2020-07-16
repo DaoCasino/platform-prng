@@ -3,4 +3,6 @@
 .DS_Store
 /.idea/
 /tags
-res.txt
+res*.txt
+logs*.txt
+cids
