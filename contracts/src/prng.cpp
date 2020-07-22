@@ -22,6 +22,9 @@ void prng::on_action(uint64_t ses_id, uint16_t type, std::vector<game_sdk::param
 }
 
 void prng::on_random(uint64_t ses_id, checksum256 rand_seed) {
+    // send raw random number
+    send_game_message(eosio::pack(rand_seed));
+
     // get generator
     auto generator = get_prng(std::move(rand_seed));
 

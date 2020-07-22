@@ -2,6 +2,7 @@
 #include <game_tester/game_tester.hpp>
 
 #include <boost/program_options.hpp>
+#include <boost/multiprecision/cpp_int.hpp>
 
 #include <iostream>
 #include <optional>
@@ -15,6 +16,7 @@
 using namespace testing;
 using namespace boost::unit_test;
 namespace po = boost::program_options;
+namespace mp = boost::multiprecision;
 
 struct colors {
     inline static const std::string red   = "\033[1;31m";
@@ -65,6 +67,36 @@ class prng_tester : public game_tester {
 
         return numbers;
     }
+
+    // generate raw 256-bit random number
+    mp::uint256_t raw() {
+        auto player_bet = STRSYM("1.0000"); ///< player's bet amount, that stuff doesn't affect to random result
+
+        // create new game session
+        auto ses_id = new_game_session(contract_name, player_name, casino_id, player_bet);
+
+        // request new random
+        game_action(contract_name, ses_id, 0, { 0, 0 });
+
+        // process signidice protocol
+        signidice(contract_name, ses_id);
+
+        // obtain return value with generated random
+        const auto message_event = get_events(events_id::game_message);
+        const auto raw_sha256 = fc::raw::unpack<sha256>(message_event.value()[0]["msg"].as<bytes>());
+
+        // sha256 to bmp number convertion
+        mp::uint256_t number = 0u;
+        number |= raw_sha256._hash[0];
+        number = number << 64;
+        number |= raw_sha256._hash[1];
+        number = number << 64;
+        number |= raw_sha256._hash[2];
+        number = number << 64;
+        number |= raw_sha256._hash[3];
+
+        return number;
+    }
 };
 
 const name prng_tester::contract_name = N(prng);
@@ -87,8 +119,9 @@ po::variables_map parse_cli_args() {
         ("seed,s", po::value<uint64_t>(), "initial seed value")
         ("count,c", po::value<uint32_t>(), "iterations amount")
         ("range,r", po::value<uint64_t>(), "random range")
-        ("columns,r", po::value<uint64_t>(), "columns count")
+        ("columns,c", po::value<uint64_t>(), "columns count")
         ("out,o", po::value<std::string>(), "output file")
+        ("raw", po::value<bool>(), "generate raw numbers")
     ;
 
     po::variables_map vm;
@@ -148,12 +181,18 @@ BOOST_AUTO_TEST_CASE(prng_test) {
     auto tester = std::make_shared<prng_tester>();
 
     for (auto i = 1; i <= iters; ++i) {
-        auto new_line = tester->line(range, columns);
-        for (auto && item: new_line) {
-            *output << item << "\t";
-        }
+        if (!opts.count("raw")) {
+            auto new_line = tester->line(range, columns);
+            for (auto && item: new_line) {
+                *output << item << "\t";
+            }
 
-        *output << "\n";
+            *output << "\n";
+        }
+        else {
+            auto raw_number = tester->raw();
+            *output << raw_number << "\n";
+        }
 
         // recreate new tester to release memory
         if (i % 1000 == 0) {

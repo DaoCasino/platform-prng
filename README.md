@@ -253,7 +253,14 @@ Some examples:
 
   ```bash
   # will generate 3x3 numbers matrix
-  ./cicd/run test --columns 3 --count 9
+  ./cicd/run test --columns 3 --count 3
+  ```
+
+- generate raw 256-bit numbers:
+
+  ```bash
+  # will generate 10 256-bet numbers and print in dec format
+  ./cicd/run test --count 10 --raw true
   ```
 
 - write result to file:
@@ -265,7 +272,7 @@ Some examples:
 
 - You can also combine all arguments to get a more preferable setup:
   ```bash
-  # will generate 999 numbers with seed 42 in the range [0,1000) and write results to `results.txt` file
+  # will generate 999 lines with seed 42 in the range [0,1000) and write results to `results.txt` file
   ./cicd/run test --count 999 --seed 42 --range 100 --columns 3 --out result.txt
   ```
 
