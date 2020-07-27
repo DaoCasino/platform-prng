@@ -119,7 +119,7 @@ po::variables_map parse_cli_args() {
         ("seed,s", po::value<uint64_t>(), "initial seed value")
         ("count,c", po::value<uint32_t>(), "iterations amount")
         ("range,r", po::value<uint64_t>(), "random range")
-        ("columns,c", po::value<uint64_t>(), "columns count")
+        ("columns", po::value<uint64_t>(), "columns count")
         ("out,o", po::value<std::string>(), "output file")
         ("raw", po::value<bool>(), "generate raw numbers")
     ;

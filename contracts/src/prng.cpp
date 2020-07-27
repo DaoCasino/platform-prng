@@ -31,7 +31,7 @@ void prng::on_random(uint64_t ses_id, checksum256 rand_seed) {
     std::vector<uint64_t> numbers;
     // get new random from generator
     for (auto i = 0; i < state.positions; ++i) {
-        numbers.push_back(generator->next() % state.rnd_range);
+        numbers.push_back(generator->next(0, state.rnd_range));
     }
 
     // return deposit and return random number
