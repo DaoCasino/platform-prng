@@ -42,7 +42,7 @@ Main components:
 ### Mathematical details of the RNG’s range (e.g., minimum value, maximum value);
 
  - original signidice range - ```[0, 2^256 - 1] (hash size)```
- - Xoshiro RPNG range - ```[0, 2^64 - 1] (uint64_t size)```
+ - RPNG range - ```[0, 2^64 - 1] (uint64_t size)```
 
 ### Mathematical details of the methods for seeding and reseeding (e.g., seed entropy source, frequency of reseeding, size of a seed, etc.);
 
@@ -98,45 +98,68 @@ struct PRNG {
     using Ptr = std::shared_ptr<PRNG>;
 
     virtual ~PRNG() {};
-    virtual uint64_t next() = 0;
+    // generates numbers in range [from, to)
+    virtual uint64_t next(uint64_t from, uint64_t to) = 0;
 };
 
 /**
-   Xoshiro256++ PRNG algo implementation
-   details: http://prng.di.unimi.it/
+   Implementation of generator based on sha256 mixing with rejection scheme
+   details: https://github.com/DaoCasino/PRNG/blob/master/PRNG.pdf
 */
-class Xoshiro : public PRNG {
+class ShaMixWithRejection : public PRNG {
   public:
-    explicit Xoshiro(const checksum256& seed) : _s(split(seed)) {}
-    explicit Xoshiro(checksum256&& seed) : _s(split(std::move(seed))) {}
-    explicit Xoshiro(std::array<uint64_t, 4>&& seed) : _s(std::move(seed)) {}
-    explicit Xoshiro(const std::array<uint64_t, 4>& seed) : _s(seed) {}
+    constexpr static intx::uint256 UINT256_MAX = ~intx::uint256(0);
 
-    uint64_t next() override {
-        const uint64_t result = roll_up(_s[0] + _s[3], 23) + _s[0];
+  public:
+    explicit ShaMixWithRejection(const checksum256& seed) : _s(to_intx(seed)) {}
+    explicit ShaMixWithRejection(checksum256&& seed) : _s(to_intx(seed)) {}
 
-        const uint64_t t = _s[1] << 17;
+    uint64_t next(uint64_t from, uint64_t to) override {
+        eosio::check(to > from, "invalid random range");
+        eosio::check(_cur_iter < UINT32_MAX, "too many next() calls");
 
-        _s[2] ^= _s[0];
-        _s[3] ^= _s[1];
-        _s[1] ^= _s[2];
-        _s[0] ^= _s[3];
+        const intx::uint256 delta(to - from);
+        const intx::uint256 cut_threshold = UINT256_MAX / delta * delta;
 
-        _s[2] ^= t;
+        auto lucky_as_hash = mix_bytes();
+        auto lucky = to_intx(lucky_as_hash);
 
-        _s[3] = roll_up(_s[3], 45);
+        while (lucky >= cut_threshold) {
+            auto lucky_bytes = lucky_as_hash.extract_as_byte_array();
+            lucky_as_hash = eosio::sha256(reinterpret_cast<const char*>(lucky_bytes.data()), 32);
+            lucky = to_intx(lucky_as_hash);
+        }
 
-        return result;
+        return uint64_t(lucky % delta + from);
     }
 
   private:
-    static inline uint64_t roll_up(const uint64_t value, const int count) {
-        return (value << count) | (value >> (64 - count));
+    // 32bytes of seed and 4 of counter
+    checksum256 mix_bytes() {
+        static_assert(sizeof(_s) == 32, "invalid `_s` size, should be 32bytes");
+        std::array<uint8_t, 36> arr;
+        std::memcpy(arr.data(), &_s, sizeof(_s));
+        std::memcpy(arr.data() + 32, &_cur_iter, sizeof(_cur_iter));
+
+        _cur_iter++;
+
+        return eosio::sha256(reinterpret_cast<const char*>(arr.data()), arr.size());
     }
 
+    static intx::uint256 to_intx(const checksum256& hash) {
+        auto parts = hash.get_array();
+        return intx::uint256(
+            intx::uint128(uint64_t(parts[0] >> 64), uint64_t(parts[0])),
+            intx::uint128(uint64_t(parts[1] >> 64), uint64_t(parts[1]))
+        );
+    }
+
+
   private:
-    std::array<uint64_t, 4> _s;
+    const intx::uint256 _s;
+    uint32_t _cur_iter { 0u };
 };
+
 
 // ===================================================================
 // Shuffler functions
@@ -190,7 +213,6 @@ auto new_random = get_prng(std::move(rand_seed))->next();
 ### (Optional) If there is any additional documentation on your RNG available that would aid us in understanding its implementation to the game etc., it would be helpful.
 
  - Original: [signidice](https://github.com/gluk256/misc/blob/master/rng4ethereum/signidice.md)
- - Xoshiro: [xoshiro](http://prng.di.unimi.it/)
 
 
 ## Code
