@@ -35,7 +35,7 @@ do
     echo "Running #$run_num for $positions positions and $iters iters"
 
     MOUNT_PATH=$(realpath "$SCRIPT_DIR/../")
-    id=$(docker run --rm -v "$MOUNT_PATH":/build -w /build -d daocasino/daobet-with-cdt:latest bash -c "./cicd/test.sh --range $range --count $iters --columns $positions --out $results_dir/result_$run_num.txt > $results_dir/log_$run_num.txt")
+    id=$(docker run --rm -v "$MOUNT_PATH":/build -w /build -d daocasino/daobet-with-cdt.ubuntu:latest bash -c "./cicd/test.sh --range $range --count $iters --columns $positions --out $results_dir/result_$run_num.txt > $results_dir/log_$run_num.txt")
     ids+=($id)
 
     ((run_num=run_num+1))

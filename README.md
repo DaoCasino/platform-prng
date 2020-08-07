@@ -42,7 +42,7 @@ Main components:
 ### Mathematical details of the RNG’s range (e.g., minimum value, maximum value);
 
  - original signidice range - ```[0, 2^256 - 1] (hash size)```
- - RPNG range - ```[0, 2^64 - 1] (uint64_t size)```
+ - PRNG range - ```[0, 2^64 - 1] (uint64_t size)```
 
 ### Mathematical details of the methods for seeding and reseeding (e.g., seed entropy source, frequency of reseeding, size of a seed, etc.);
 
@@ -227,10 +227,7 @@ You can launch our tests to understand the processes generating a random number 
 
 ### clone repo and submodules
 ```bash
-git clone https://github.com/DaoCasino/platform-prng
-cd platform-prng
-git submodule init
-git submodule update --init --recursive
+git clone --recurse-submodules https://github.com/DaoCasino/platform-prng
 ```
 
 ### build
@@ -297,7 +294,3 @@ Some examples:
   # will generate 999 lines with seed 42 in the range [0,1000) and write results to `results.txt` file
   ./cicd/run test --count 999 --seed 42 --range 100 --columns 3 --out result.txt
   ```
-
-
-
-
